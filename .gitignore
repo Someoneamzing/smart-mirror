@@ -2,6 +2,8 @@
 node_modules
 /dist
 
+# env files
+.env
 
 # local env files
 .env.local
@@ -24,3 +26,6 @@ pnpm-debug.log*
 
 #Electron-builder output
 /dist_electron
+
+#GoogleAPI credentials
+credentials.json

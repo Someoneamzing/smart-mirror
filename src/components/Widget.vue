@@ -6,33 +6,29 @@
         <mwc-icon-button icon="close" @click="removeWidget" />
       </div>
       <div class="widget-settings" :style="{top: `${settingsOpen?0:-100}%`}">
-        <div class="widget-settings-scroll">
-          <label>Width<mwc-icon>swap_horiz</mwc-icon></label><input type="number" v-model="width">
-          <label>Height<mwc-icon>swap_vert</mwc-icon></label><input type="number" v-model="height">
-        </div>
+        <table class="widget-settings-scroll">
+          <tr class='widget-setting-row'><td class="setting-label-cell"><label>Width<mwc-icon>swap_horiz</mwc-icon></label></td><td class="setting-value-cell"><input type="number" v-model="width"></td></tr>
+          <tr class='widget-setting-row'><td class="setting-label-cell"><label>Height<mwc-icon>swap_vert</mwc-icon></label></td><td class="setting-value-cell"><input type="number" v-model="height"></td></tr>
+          <tr class='widget-setting-row' v-for="setting in Object.keys(typeInfo.settings)" :key="setting">
+            <td class="setting-label-cell"><label>{{typeInfo.settings[setting].name}}</label></td><td class="setting-value-cell">
+              <input v-if="['string','number','boolean'].includes(typeInfo.settings[setting].type)" :type="{'string':'text','number':'number','boolean':'checkbox'}[typeInfo.settings[setting].type]" :checked="$store.getters['widgets/setting'](id, setting)" :value="$store.getters['widgets/setting'](id, setting)" @change="$store.commit('widgets/updateSetting', {id, prop: setting, value: $event.target[typeInfo.settings[setting].type==='boolean'?'checked':'value']})">
+              <select :ref="setting + 'select'" v-if="typeInfo.settings[setting].type == 'enum'" @change="(e)=>{$store.commit('widgets/updateSetting', {id, prop: setting, value: e.target.value})}">
+                <option :selected="(typeof option == 'string'?option:option.value) == $this[setting]" v-for="option in ( typeof typeInfo.settings[setting].enumerations === 'string' ? enumSettingsCaller(setting) : typeInfo.settings[setting].enumerations)" :key="typeof option == 'string'?option:option.value" :value="typeof option == 'string'?option:option.value">{{typeof option == 'string'?option:option.name}}</option>
+              </select>
+            </td><!-- <mwc-switch v-else-if="typeInfo.settings[setting].type === 'boolean'" v-model="$data[setting]" /> -->
+          </tr>
+        </table>
         <!-- <mwc-textfield :outlined="false" label="Width" icon="width" /> -->
         <!-- <mwc-textfield :outlined="false" label="Height" icon="height" /> -->
       </div>
+      <!-- <p>{{widgetType}}</p> -->
+      <component ref="component" :settings="settings" :is="widgetType" :id="id"></component>
     </div>
   </div>
 </template>
 
 <script>
-
-function widgetSettings(props) {
-  let res = {};
-  for (let prop of props) {
-    res[prop] = {
-      get(){
-        return this.$store.getters['widgets/setting'](this.id, prop);
-      },
-      set(value) {
-        this.$store.commit('widgets/updateSetting', {id: this.id, prop, value})
-      }
-    }
-  }
-  return res;
-}
+import {widgetSettings} from '@/widgetHelpers'
 
 export default {
   name: 'Widget',
@@ -53,11 +49,19 @@ export default {
     mouseOffset: {x: 0, y: 0},
     sizeOnDrag: {width: 0, height: 0},
     grid: {width: 0, height: 0},
+    selectUnwatchers: []
   }},
   computed: {
+    settings() {return this.$store.getters['widgets/settings'](this.id)},
+    widgetType() {return this.$store.getters['widgets/type'](this.id)},
+    typeInfo() {return this.$store.getters['widgets/typeInfo'](this.id)},
     ...widgetSettings(['x','y','width','height']),
+    $this() {return this}
   },
   methods: {
+    enumSettingsCaller(setting) {
+      return this.$refs['component']?this.$refs['component'][this.typeInfo.settings[setting].enumerations]:[];
+    },
     settingsTimeoutHandler() {
       if (this.settingsTimeout !== null) {
         this.settingsTimeout = null;
@@ -116,25 +120,43 @@ export default {
       }
     }
   },
+  mounted() {
+    this.$nextTick(()=>{
+      for (let setting of Object.keys(this.typeInfo.settings).filter(setting=>this.typeInfo.settings[setting].type === 'enum' && typeof this.typeInfo.settings[setting].enumerations === 'string')) {
+        let path = '$refs.component.' + this.typeInfo.settings[setting].enumerations;
+        console.log(path);
+        console.log(this.$refs.component[this.typeInfo.settings[setting].enumerations]);
+        this.selectUnwatchers.push(this.$watch(path, ()=>{
+          console.log("Setting changed!!!");
+          this.$forceUpdate()
+        }))
+      }
+    })
+  },
+  beforeDestroy() {
+    for (let unwatch of this.selectUnwatchers) {
+      unwatch();
+    }
+  }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .widget,.widget-content {
-    background-color: #111;
     border-radius: 1rem;
     color: white;
     position: relative;
     overflow: hidden;
   }
 
-  .widget {
+  .widget:hover {
     background: #070707;
   }
 
   .widget-content {
     height: 100%;
+    /* background-color: #111; */
   }
 
   .widget-content.moving {
@@ -171,18 +193,33 @@ export default {
     width: 100%;
     height: 100%;
     z-index: 10;
-    background: #222;
+    background: #222222f5;
     transition: top .3s;
     padding: 1rem;
     padding-top: 2rem;
   }
 
+  .setting-label-cell {
+    text-align: right;
+  }
+
+  .widget-settings td {
+    padding: 5px;
+  }
+
   .widget-settings-scroll {
-    display: grid;
-    grid-template-columns: auto auto;
+    /* display: grid; */
+    /* grid-template-columns: auto auto; */
+    display: block;
+    width: 100%;
     max-height: 100%;
-    overflow-y: auto;
     gap: .5rem;
+    overflow-y: auto;
+  }
+
+  .widget-settings-scroll tr {
+    width: 100%;
+    /* display: block; */
   }
 
   .widget-settings-scroll::-webkit-scrollbar {
@@ -201,6 +238,40 @@ export default {
   .settings-icon {
     z-index: 20;
   }
+
+  .widget-settings input[type="checkbox"] {
+    appearance: none;
+    background: grey;
+    display: block;
+    width: 30px;
+    height: 18px;
+    border-radius: 9px;
+    position: relative;
+    border: none;
+  }
+
+  .widget-settings input[type="checkbox"]::before {
+    border-radius: 100%;
+    width: 18px;
+    height: 18px;
+    display: block;
+    background: lightgrey;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    content: "";
+    transition: left 0.3s;
+  }
+
+  .widget-settings input[type="checkbox"]:checked {
+    background-color: #5cbbff;
+  }
+
+  .widget-settings input[type="checkbox"]:checked::before {
+    left: 13px;
+    right: 0;
+  }
+
 
   mwc-icon,label {
     vertical-align: middle;

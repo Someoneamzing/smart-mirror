@@ -8,27 +8,69 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
+let authDialog
+let spotifyAuthDialog
+
+// app.commandLine.appendSwitch('widevine-cdm-path', process.platform === 'win32'?"C:\\Program Files (x86)\\Google\\Chrome\\Application\\84.0.4147.135\\WidevineCdm\\_platform_specific\\win_x64widevinecdm.dll":"");
+// app.commandLine.appendSwitch('widevine-cdm-version', '4.10.1679.0')
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { secure: true, standard: true } }
+  { scheme: 'app', privileges: { secure: true, standard: true } },
 ])
 
 function createWindow() {
   // Create the browser window.
+
   win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
+      plugins: true,
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
     },
     frame: false
   })
+  authDialog = new BrowserWindow({
+    width: 500,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    },
+    parent: win,
+    modal: true,
+    show: false
+  })
+  spotifyAuthDialog = new BrowserWindow({
+    width: 500,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false
+    },
+    parent: win,
+    moadal: true,
+    show: false
+  })
+
+  authDialog.on('close', (e)=>e.preventDefault())
+  spotifyAuthDialog.on('close', (e)=>e.preventDefault())
+
+  protocol.registerHttpProtocol('smart-mirror-spotify', (request, cb)=>{
+    let url = new URL(request.url);
+    console.log(url.searchParams);
+    win.webContents.send('spotify-auth-response', {error: url.searchParams.get('error'), state: url.searchParams.get('state'), code: url.searchParams.get('code')})
+    cb({
+      statusCode: 200,
+      data: "<h1>Authorised</h1>",
+    })
+    spotifyAuthDialog.hide();
+  })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
+    authDialog.loadURL(process.env.WEBPACK_DEV_SERVER_URL + '/auth.html')
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
@@ -57,6 +99,21 @@ ipcMain.on('get-user-path', (event)=>{
   event.returnValue = app.getPath('userData')
 })
 
+ipcMain.on('open-auth', (event, url)=>{
+  authDialog.show()
+  authDialog.webContents.send('auth-url', url)
+  /* eslint-disable-next-line no-unused-vars */
+  ipcMain.once('submit-code', (evt, code)=>{
+    event.reply('auth-code', code)
+    authDialog.hide()
+  })
+})
+
+ipcMain.on('open-spotify-auth', (event, url)=>{
+  spotifyAuthDialog.loadURL(url)
+  spotifyAuthDialog.show()
+})
+
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
@@ -68,7 +125,8 @@ app.on('activate', () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', async () => {
+app.on('widevine-ready',async () => {
+  console.log("Widevine ready... Launching");
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
@@ -79,6 +137,7 @@ app.on('ready', async () => {
   }
   createWindow()
 })
+app.on('ready', ()=>console.log("App ready. Waiting for widevine..."))
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

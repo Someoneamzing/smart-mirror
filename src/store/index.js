@@ -22,7 +22,7 @@ export default new Vuex.Store({
       let res = {widgets: state.widgets.widgets};
       // let res = {widgets: []};
       // console.log('saving', res);
-      fs.promises.writeFile(path.join(ipcRenderer.sendSync('get-user-path'), 'widgets.json'), JSON.stringify(res))
+      if (state.widgets.loaded) fs.promises.writeFile(path.join(ipcRenderer.sendSync('get-user-path'), 'widgets.json'), JSON.stringify(res))
     })
   }]
 })
