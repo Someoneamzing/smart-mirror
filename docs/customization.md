@@ -81,6 +81,5 @@ This template is not final and more types / options are soon to be implemented.
 ```
 
 This example would render like so:
-![](./images/example-widget.png)
 
-![](./images/example-widget-settings.png)
+![](./images/example-widget.png)![](./images/example-widget-settings.png)
