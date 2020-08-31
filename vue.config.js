@@ -1,3 +1,5 @@
+// const nodeExternals = require('webpack-node-externals');
+
 module.exports = {
   pluginOptions: {
     electronBuilder: {
@@ -22,8 +24,7 @@ module.exports = {
     auth: 'src/auth.js'
   },
   configureWebpack: {
-    externals: {
-      vm2: 'commonjs2 vm2'
-    }
+    // target: 'electron-renderer',
+    // externals: [nodeExternals({allowlist: [/@material/, /lit-/, 'material-deisgn-icons/iconfont/material-icons.css']})],
   }
 }

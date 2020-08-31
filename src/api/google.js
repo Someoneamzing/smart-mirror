@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { ipcRenderer } from 'electron'
 import { google } from 'googleapis'
+import Vue from 'vue'
 
 export const GoogleCalendar = new (class GoogleCalendar {
   constructor(){
@@ -13,26 +14,35 @@ export const GoogleCalendar = new (class GoogleCalendar {
 
   auth() {
     return new Promise((resolve, reject) => {
+      Vue.$log("Authenicating with google...");
       fs.readFile('./credentials.json', 'utf-8', (err, content)=>{
         if (err) return reject('Unable to load credentials. ' + err.toString())
-        // console.log(content);
+        // Vue.$log(content);
         const {client_secret, client_id, redirect_uris} = JSON.parse(content).installed;
+        Vue.$log("Initialising OAuth2Client ...");
         this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+        Vue.$log("Checking for existing tokens...");
         fs.readFile(this.TOKEN_PATH, (err, token)=>{
           if (err) {
+            Vue.$log("No existing tokens. Fetching new one...");
             const authUrl = this.oAuth2Client.generateAuthUrl({access_type: 'offline', scope: this.SCOPES});
+            Vue.$log("Waiting for user to allow access.");
             ipcRenderer.send('open-auth', authUrl)
             ipcRenderer.once('auth-code', (event, code)=>{
-              // console.log(code);
+              Vue.$log("Recieved auth code. Fetching new token...");
               this.oAuth2Client.getToken(code, (err, token) => {
                 if (err) reject('Error retrieving access token ' + err.toString())
+                Vue.$log("Got new token. Using it.");
                 this.oAuth2Client.setCredentials(token);
-                fs.writeFile(this.TOKEN_PATH, JSON.stringify(token), (err)=>{if (err) console.log("Storing token: " + err.toString())})
+                Vue.$log("Authed with new token");
+                fs.writeFile(this.TOKEN_PATH, JSON.stringify(token), (err)=>{if (err) Vue.$log("Storing token: " + err.toString())})
                 resolve()
               })
             })
           } else {
+            Vue.$log("Found existing token. Using it.");
             this.oAuth2Client.setCredentials(JSON.parse(token));
+            Vue.$log("Authed with existing token.");
             resolve()
           }
         })
@@ -79,7 +89,7 @@ export const GoogleTasks = new (class GoogleTasks {
     return new Promise((resolve, reject) => {
       fs.readFile('./credentials.json', 'utf-8', (err, content)=>{
         if (err) return reject('Unable to load credentials. ' + err.toString())
-        // console.log(content);
+        // Vue.$log(content);
         const {client_secret, client_id, redirect_uris} = JSON.parse(content).installed;
         this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
         fs.readFile(this.TOKEN_PATH, (err, token)=>{
@@ -87,11 +97,11 @@ export const GoogleTasks = new (class GoogleTasks {
             const authUrl = this.oAuth2Client.generateAuthUrl({access_type: 'offline', scope: this.SCOPES});
             ipcRenderer.send('open-auth', authUrl)
             ipcRenderer.once('auth-code', (event, code)=>{
-              // console.log(code);
+              // Vue.$log(code);
               this.oAuth2Client.getToken(code, (err, token) => {
                 if (err) reject('Error retrieving access token ' + err.toString())
                 this.oAuth2Client.setCredentials(token);
-                fs.writeFile(this.TOKEN_PATH, JSON.stringify(token), (err)=>{if (err) console.log("Storing token: " + err.toString())})
+                fs.writeFile(this.TOKEN_PATH, JSON.stringify(token), (err)=>{if (err) Vue.$log("Storing token: " + err.toString())})
                 resolve()
               })
             })

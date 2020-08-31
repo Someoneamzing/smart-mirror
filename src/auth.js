@@ -13,7 +13,6 @@ ipcRenderer.on('auth-url', (event, url)=>{
 
 form.onsubmit = (event)=>{
   event.preventDefault();
-  console.log(code.value);
   ipcRenderer.send('submit-code', code.value)
 }
 

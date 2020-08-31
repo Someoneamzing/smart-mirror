@@ -192,7 +192,6 @@ export default {
     // },
     eventsByDate() {
       let res = this.events.reduce((dates, event)=>{
-        console.log(dates);
         let startSpecific = new Date(event.start.dateTime || event.start.date);
         let endSpecific = new Date(event.end.dateTime || event.end.date);
         let date = new Date(startSpecific.getFullYear(), startSpecific.getMonth(), startSpecific.getDate(), 0,0,0);

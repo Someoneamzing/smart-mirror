@@ -4,6 +4,13 @@ import { ipcMain, app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+import socketio from 'socket.io'
+const io = socketio({serveClient: false})
+const alerts = [];
+
+io.on('connection',(socket)=>{
+  socket.emit('alerts', alerts)
+})
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -95,6 +102,11 @@ app.on('window-all-closed', () => {
   }
 })
 
+ipcMain.on('alert', (event, alert)=>{
+  alerts.push(alert);
+  io.emit('alerts', [alert]);
+})
+
 ipcMain.on('get-user-path', (event)=>{
   event.returnValue = app.getPath('userData')
 })
@@ -153,3 +165,7 @@ if (isDevelopment) {
     })
   }
 }
+
+io.listen(process.env.VUE_APP_ALERT_WEBSERVER_PORT, ()=>{
+  console.log("Alert server up on port " + process.env.VUE_APP_ALERT_WEBSERVER_PORT);
+})

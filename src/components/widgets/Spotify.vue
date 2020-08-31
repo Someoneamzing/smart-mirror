@@ -101,32 +101,31 @@ export default {
   },
   created() {
     SpotifyAPI.auth().then(()=>{
-      // SpotifyAPI.currently_playing().then(_=>console.log(_))
       this.player = SpotifyAPI.getNewPlayer({name: "Smart Mirror", volume: this.volume})
       this.player.on('authentication_error', (err)=>{
-        console.error(err);
+        this.$error("Spotify authenitaction error", err);
       })
       this.player.addListener('not_ready', ({device_id})=>{
-        console.log("Not ready on device " + device_id);
+        this.$log("Spotify not ready on device " + device_id);
       })
       this.player.addListener('ready', ({device_id})=>{
-        console.log("Ready on device " + device_id);
+        this.$log("Spotify ready on device " + device_id);
       })
       this.player.addListener('player_state_changed', (state)=>{
         this.update(state)
       })
       this.player.on('playback_error', (message) => {
-        console.error('Failed to perform playback', message);
+        this.$error('Failed to perform playback', message);
       });
       this.player.on('account_error', (message) => {
-        console.error('Failed to perform playback', message);
+        this.$error('Spotify account error.', message);
       });
       this.player.on('initialization_error', (message) => {
-        console.error('Failed to perform playback', message);
+        this.$error('Spotify initialization error', message);
       });
       this.player.connect().then(success => {
         if (success) {
-          console.log("Connected!");
+          this.$log("Spotify player connected!");
         }
       })
       this.updateTimeout = setInterval(this.update.bind(this), 1000)

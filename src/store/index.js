@@ -18,13 +18,11 @@ function saveBuffered(data) {
     buffered = true;
     savePoller = setInterval(()=>{
       if (!buffered) {
-        console.log("No new data came in saving");
         fs.promises.writeFile(path.join(ipcRenderer.sendSync('get-user-path'), 'widgets.json'), JSON.stringify(lastData))
         clearInterval(savePoller)
         savePoller = null;
         buffering = false;
       } else {
-        console.log("New data came in stalling");
         buffered = false
       }
     }, 1000)
@@ -43,11 +41,9 @@ export default new Vuex.Store({
     widgets
   },
   plugins: [(store)=>{
-    /* eslint-disable no-unused-vars */
+    /* eslint-disable-next-line no-unused-vars */
     store.subscribe((mutation, state)=>{
       let res = {widgets: state.widgets.widgets};
-      // let res = {widgets: []};
-      // console.log('saving', res);
       if (state.widgets.loaded) saveBuffered(res);
     })
   }]

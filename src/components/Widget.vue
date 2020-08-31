@@ -116,7 +116,6 @@ export default {
         this.mouse.y = event.clientY
         this.x = Math.round((this.mouse.x - this.mouseOffset.x) / this.grid.width) + 1;
         this.y = Math.round((this.mouse.y - this.mouseOffset.y) / this.grid.height) + 1;
-        // console.log(this.grid.width, this.grid.height, window.getComputedStyle(this.$el.parentElement, ":before").width.slice(0, -2), window.getComputedStyle(this.$el.parentElement, ":before").height.slice(0, -2));
       }
     }
   },
@@ -124,10 +123,7 @@ export default {
     this.$nextTick(()=>{
       for (let setting of Object.keys(this.typeInfo.settings).filter(setting=>this.typeInfo.settings[setting].type === 'enum' && typeof this.typeInfo.settings[setting].enumerations === 'string')) {
         let path = '$refs.component.' + this.typeInfo.settings[setting].enumerations;
-        console.log(path);
-        console.log(this.$refs.component[this.typeInfo.settings[setting].enumerations]);
         this.selectUnwatchers.push(this.$watch(path, ()=>{
-          console.log("Setting changed!!!");
           this.$forceUpdate()
         }))
       }

@@ -20,8 +20,6 @@ const priv = {
   redirect_uri: 'smart-mirror-spotify://callback'
 }
 
-// console.log(priv.client_id, priv.client_secret);
-
 const SpotifyAPI = new (class Spotify {
   constructor() {
     this.authed = false;
@@ -127,7 +125,6 @@ const SpotifyAPI = new (class Spotify {
     })
 
     if (!response.ok) throw new Error(`${response.status}: ${response.statusText};\n${await response.text()}`)
-    // console.log();
     return await response.json()
   }
 
@@ -135,46 +132,7 @@ const SpotifyAPI = new (class Spotify {
     return await this.request('https://api.spotify.com/v1/me/player')
   }
 
-  // loadSDK() {
-  //   /* eslint-disable no-async-promise-executor */
-  //   return new Promise(async (resolve, reject) => {
-  //     let needed = []
-  //     const readyFunc = ()=>{
-  //       this.Player = sandbox.window.Spotify.Player;
-  //       resolve()
-  //     };
-  //     let sandbox = {window: {
-  //       addEventListener: (...args)=>{
-  //         window.addEventListener(...args)
-  //       },
-  //       removeEventListener: (...args)=>{
-  //         window.removeEventListener(...args)
-  //       },
-  //       document, onSpotifyWebPlaybackSDKReady: readyFunc, localStorage: {
-  //         getItem: (...args)=>localStorage.getItem(...args),
-  //         setItem: (...args)=>localStorage.setItem(...args),
-  //       }
-  //     }, document, onSpotifyWebPlaybackSDKReady: readyFunc, localStorage: {
-  //       getItem: (...args)=>localStorage.getItem(...args),
-  //       setItem: (...args)=>localStorage.setItem(...args),
-  //     }}
-  //     let vm = new VM({timeout: 10000, sandbox});
-  //     try {
-  //       console.log("A");
-  //       vm.run(await(await fetch("https://sdk.scdn.co/spotify-player.js")).text(), 'spotify-player.js')
-  //       console.log("A");
-  //     } catch (e) {
-  //       console.log("A");
-  //       console.error(`${e.stack}`);
-  //       reject(e.stack)
-  //       console.log("A");
-  //     }
-  //     console.log(needed);
-  //   });
-  // }
-
   getNewPlayer({name, volume}) {
-    console.log(this.Player);
     return new this.Player({name, volume, getOAuthToken: callback => {
       callback(priv.access_token)
     }})

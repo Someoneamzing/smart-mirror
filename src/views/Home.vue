@@ -36,31 +36,26 @@ export default {
   computed: {
     widgets() {
       let res = this.$store.state.widgets.widgets;
-      console.log(res);
       return res
     }
   },
   methods: {
     addNewWidget(event) {
-      console.log(event);
-
       this.$store.commit('widgets/add', {id: uuid(), type: event.target.items[event.detail.index].value})
     },
     updateStats(data) {
-      console.log("Update");
       this.wifiConnected = data.networkInterfaces.some(int=>int.operstate == 'up')
       this.cpuTemp = data.cpuTemperature.main
     }
   },
   created() {
     this.statusFork = fork('src/api/statusWorker.js', {stdio: 'pipe'})
-    // console.log(this.statusFork);
     this.statusFork.on('message', this.updateStats.bind(this));
     this.statusFork.stdout.on('data', (data) => {
-      console.log(data.toString());
+      this.$log("Status Worker: ", data.toString());
     })
     this.statusFork.stderr.on('data', (data) => {
-      console.error(data.toString());
+      this.$error("Status Worker: ", data.toString());
     })
     // currentWatcher = this.updateStats;
     // this.updateStats = this.updateStats.bind(this)
