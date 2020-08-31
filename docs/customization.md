@@ -9,7 +9,7 @@ This is just a regular Vue component, with a few requirements for proper functio
 
 ## The Settings Template
 In order to facilitate persistent settings the Widget components are expected to export an extra object to specify the settings as well as other bits of metadata.
-This object is expected to be exported alongside the component definition under the name `widget` (i.e. `export const widget = {...}`). This object follows the following structure:
+This object is expected to be exported under the name `widget`. This object follows the following structure:
 - `widget`
   - `name`: the user visible name of the widget. This is what appears under the widget adder's menu.
   - `settings`: An object containing the definitions of the widgets various persistent settings.
@@ -29,9 +29,7 @@ This template is not final and more types / options are soon to be implemented.
 <template>
   <div class="example-widget">
     <h1>Example Widget</h1>
-    <p>The set value for the example number is {{exampleSetting}}</p>
-    <p>The set value for the example string is {{exampleTextSetting}}</p>
-    <p>The set value for the example enum is {{exampleEnumSetting}}</p>
+    <p>The set value for the example setting is {{exampleSetting}}</p>
   </div>
 </template>
 
@@ -44,17 +42,6 @@ This template is not final and more types / options are soon to be implemented.
         name: "Example Setting",
         type: "number",
         default: 3
-      },
-      exampleTextSetting: {
-        name: "Text Setting",
-        type: "string",
-        default: "Default Value"
-      },
-      exampleEnumSetting: {
-        name: "Example Enum",
-        type: "enum",
-        default: 'Option 1',
-        enumerations: ['Option 1', {name: 'Option 2', value: 'option2'}]
       }
     }
   }
@@ -79,8 +66,3 @@ This template is not final and more types / options are soon to be implemented.
   }
 </style>
 ```
-
-This example would render like so:
-![](./images/example-widget.png)
-
-![](./images/example-widget-settings.png)
