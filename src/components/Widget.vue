@@ -148,6 +148,7 @@ export default {
     color: white;
     position: relative;
     overflow: hidden;
+    user-select: none;
   }
 
   .widget:hover {

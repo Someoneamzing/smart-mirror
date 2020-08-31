@@ -20,13 +20,8 @@
 // @ is an alias to /src
 import Widget from '@/components/Widget';
 import {v4 as uuid} from 'uuid';
-import si from 'systeminformation'
-
-let currentWatcher = null;
-si.observe({
-  cpuTemperature: 'main',
-  networkInterfaces: '*',
-}, 1000, (data)=>{currentWatcher?currentWatcher(data):0})
+// import si from 'systeminformation';
+import {fork} from 'child_process';
 
 export default {
   name: 'Home',
@@ -36,6 +31,7 @@ export default {
   data() {return {
     wifiConnected: false,
     cpuTemp: -1,
+    statusFork: null
   }},
   computed: {
     widgets() {
@@ -51,18 +47,30 @@ export default {
       this.$store.commit('widgets/add', {id: uuid(), type: event.target.items[event.detail.index].value})
     },
     updateStats(data) {
+      console.log("Update");
       this.wifiConnected = data.networkInterfaces.some(int=>int.operstate == 'up')
       this.cpuTemp = data.cpuTemperature.main
     }
   },
   created() {
-    this.updateStats = this.updateStats.bind(this)
-    currentWatcher = this.updateStats;
+    this.statusFork = fork('src/api/statusWorker.js', {stdio: 'pipe'})
+    // console.log(this.statusFork);
+    this.statusFork.on('message', this.updateStats.bind(this));
+    this.statusFork.stdout.on('data', (data) => {
+      console.log(data.toString());
+    })
+    this.statusFork.stderr.on('data', (data) => {
+      console.error(data.toString());
+    })
+    // currentWatcher = this.updateStats;
+    // this.updateStats = this.updateStats.bind(this)
+    // this.statusInterval = si.observe({
+    //   cpuTemperature: 'main',
+    //   networkInterfaces: '*',
+    // }, 1000, (data)=>{this.updateStats(data)})
   },
   beforeDestroy() {
-    if (this.updateStats === currentWatcher) {
-      currentWatcher = null;
-    }
+    this.statusFork.kill();
   },
   mounted() {
     this.$refs['new-menu'].anchor = this.$refs['new-button']
@@ -103,7 +111,7 @@ export default {
 
   .status-bar {
     position: fixed;
-    top: 0;
+    top: 1px;
     left: 0;
     width: 100vw;
     /* height: 20px; */
