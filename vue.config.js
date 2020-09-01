@@ -26,5 +26,8 @@ module.exports = {
   configureWebpack: {
     // target: 'electron-renderer',
     // externals: [nodeExternals({allowlist: [/@material/, /lit-/, 'material-deisgn-icons/iconfont/material-icons.css']})],
+    externals: {
+      vm2: 'commonjs2 vm2'
+    }
   }
 }

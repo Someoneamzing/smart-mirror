@@ -8,6 +8,8 @@ import socketio from 'socket.io'
 const io = socketio({serveClient: false})
 const alerts = [];
 
+app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+
 io.on('connection',(socket)=>{
   socket.emit('alerts', alerts)
 })
@@ -34,6 +36,7 @@ function createWindow() {
     height: 600,
     webPreferences: {
       plugins: true,
+      webSecurity: false,
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
