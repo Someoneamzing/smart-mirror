@@ -55,7 +55,6 @@ export default {
       this.seconds = date.getSeconds();
       this.amPm = this.hours > 11?"PM":"AM"
       this.dateString = date.toDateString()
-      this.$log(`Time is ${this.hours}:${this.minutes}:${this.seconds}`)
       if (this.analog) {
         let canvas = this.$refs['canvas'];
         let ctx = canvas.getContext('2d');

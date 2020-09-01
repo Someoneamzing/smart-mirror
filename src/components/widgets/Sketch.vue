@@ -48,47 +48,45 @@ export default {
   },
   methods: {
     async registerSketch(sketch){
-      console.log("Registering Sketch...");
-      this.$log(this);
+      this.$log("Registering Sketch...");
       let match = this.source.match(REMOTE_REGEX)
       let src = this.source;
       try {
         if (match) {
-          console.log("Found remote reference. Fetching...");
+          this.$log("Found remote reference. Fetching...");
           let user = encodeURIComponent(match[1]);
           let projectID = match[2].replace(/ /g, '_');
           if (this.cachedProject.user === user && this.cachedProject.project === projectID) {
             // src = this.cachedSource;
-            console.log("Sketch was cached. Using that.");
+            this.$log("Sketch was cached. Using that.");
           } else {
             let url  =`https://editor.p5js.org/sketches/${projectID}/assets/sketch.js?cache-bust=${encodeURIComponent(Math.floor(Math.random() * 1000000000))}`;
-            console.log(url);
+            this.$log(url);
             let response = await fetch(url, {
               cache: 'no-store',
               headers: {
                 'Cache-Control': 'no-cache'
               }
             })
-            console.log(response);
+            // console.log(response);
             src = await response.text();
             src += EXPORT_SUFFIX
-            console.log(src);
+            // console.log(src);
             this.cachedProject.user = user;
             this.cachedProject.project = projectID
             this.activeScript = new VMScript(src);
           }
         } else {
-          console.log("Using local script");
+          this.$log("Using local script");
           let script = src + EXPORT_SUFFIX;
-          console.log(script);
           this.activeScript = new VMScript(script)
         }
-        console.log("Compiling script...");
+        this.$log("Compiling script...");
         this.activeScript.compile()
       } catch (e) {
         this.$error(e)
       }
-      console.log(sketch);
+      // console.log(sketch);
       // sketch.console = {
       //   log: (...args)=>console.log(...args),
       //   warn: (...args)=>console.warn(...args),
@@ -110,9 +108,8 @@ export default {
       proxy.console = {log: ()=>{},warn: ()=>{},error: ()=>{}};
       this.activeVM = new VM({timeout: 10000, sandbox: proxy, eval: false, wasm: false})
       try {
-        console.log("Running sketch...");
+        this.$log("Running sketch...");
         let out = this.activeVM.run(this.activeScript)();
-        console.log(out);
         out.setup()
         sketch.draw = ()=>{
           out.draw()
