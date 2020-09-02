@@ -102,9 +102,9 @@ const SpotifyAPI = new (class Spotify {
         body,
       })
       if (response.status === 200) {
-        let {access_token, expires_in, refresh_token} = await response.json();
+        let {access_token, expires_in} = await response.json();
         priv.access_token = access_token;
-        this.setRefresh(refresh_token);
+        // this.setRefresh(refresh_token);
         this.refreshAfter(expires_in);
       } else {
         throw new Error("Error while refreshing access token. " + await response.text())
@@ -125,7 +125,7 @@ const SpotifyAPI = new (class Spotify {
     })
 
     if (!response.ok) throw new Error(`${response.status}: ${response.statusText};\n${await response.text()}`)
-    return await response.json()
+    return response.status == 204 ? {} : await response.json()
   }
 
   async currently_playing() {

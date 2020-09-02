@@ -5,7 +5,7 @@
       <div class="player-info">
         <img src="@/assets/Spotify_Icon_RGB_White.png" alt="" class="spotify-logo">
         <span class="now-playing-title">Now Playing:</span>
-        <span class="now-playing">{{current_track?`${current_track.name} - ${current_track.artists.map(artist=>artist.name).join(", ")}`:''}}</span>
+        <span class="now-playing">{{current_track?(current_track.type=='track'?`${current_track.name} - ${current_track.artists.map(artist=>artist.name).join(", ")}`:current_track.name):''}}</span>
         <div class="scrubber">
           <span class="progress-time">{{current_track?getMinutesSeconds(progress):'-:--'}}</span>
           <span class="duration-time">{{current_track?getMinutesSeconds(duration):'-:--'}}</span>
@@ -55,9 +55,11 @@ export default {
     async update(state = null) {
       if (this.fetching) return;
       this.fetching = true;
-      if (!state) state = await this.player.getCurrentState();
+      if (!state&&this.player) state = await this.player.getCurrentState();
       if (state == null) {
-        state = await SpotifyAPI.request('https://api.spotify.com/v1/me/player')
+        // console.log("API");
+        state = await SpotifyAPI.request('https://api.spotify.com/v1/me/player', {'additional_types': 'episode,track'})
+        // console.log(state);
         const {progress_ms = -1, is_playing = false, item = null} = state;
         this.duration = item?item.duration_ms:-1;
         let diff = progress_ms-this.progress
@@ -90,9 +92,11 @@ export default {
   }},
   computed: {
     track_art() {
-      return this.current_track == null?'':(this.current_track.album.images.length > 1 ? JSON.parse(JSON.stringify(this.current_track.album.images)).sort((a, b)=>{
+      if (this.current_track == null) return '';
+      let imageList = this.current_track.type == "track" ? this.current_track.album.images : this.current_track.images;
+      return this.current_track == null?'':(imageList.length > 1 ? JSON.parse(JSON.stringify(imageList)).sort((a, b)=>{
         return Math.abs(a.width - ALBUM_TARGET_WIDTH) - Math.abs(b.width - ALBUM_TARGET_WIDTH)
-      })[0] : this.current_track.album.images[0]).url;
+      })[0] : imageList[0]).url;
     },
     progress_percent() {
       return Math.floor(this.progress / this.duration * 100 * 10000)/ 10000;
@@ -101,39 +105,39 @@ export default {
   },
   created() {
     SpotifyAPI.auth().then(()=>{
-      this.player = SpotifyAPI.getNewPlayer({name: "Smart Mirror", volume: this.volume})
-      this.player.on('authentication_error', (err)=>{
-        this.$error("Spotify authenitaction error", err);
-      })
-      this.player.addListener('not_ready', ({device_id})=>{
-        this.$log("Spotify not ready on device " + device_id);
-      })
-      this.player.addListener('ready', ({device_id})=>{
-        this.$log("Spotify ready on device " + device_id);
-      })
-      this.player.addListener('player_state_changed', (state)=>{
-        this.update(state)
-      })
-      this.player.on('playback_error', (message) => {
-        this.$error('Failed to perform playback', message);
-      });
-      this.player.on('account_error', (message) => {
-        this.$error('Spotify account error.', message);
-      });
-      this.player.on('initialization_error', (message) => {
-        this.$error('Spotify initialization error', message);
-      });
-      this.player.connect().then(success => {
-        if (success) {
-          this.$log("Spotify player connected!");
-        }
-      })
+      // this.player = SpotifyAPI.getNewPlayer({name: "Smart Mirror", volume: this.volume})
+      // this.player.on('authentication_error', (err)=>{
+      //   this.$error("Spotify authenitaction error", err);
+      // })
+      // this.player.addListener('not_ready', ({device_id})=>{
+      //   this.$log("Spotify not ready on device " + device_id);
+      // })
+      // this.player.addListener('ready', ({device_id})=>{
+      //   this.$log("Spotify ready on device " + device_id);
+      // })
+      // this.player.addListener('player_state_changed', (state)=>{
+      //   this.update(state)
+      // })
+      // this.player.on('playback_error', (message) => {
+      //   this.$error('Failed to perform playback', message);
+      // });
+      // this.player.on('account_error', (message) => {
+      //   this.$error('Spotify account error.', message);
+      // });
+      // this.player.on('initialization_error', (message) => {
+      //   this.$error('Spotify initialization error', message);
+      // });
+      // this.player.connect().then(success => {
+      //   if (success) {
+      //     this.$log("Spotify player connected!");
+      //   }
+      // })
       this.updateTimeout = setInterval(this.update.bind(this), 1000)
     }).catch((err)=>console.error(err.stack))
   },
   beforeDestroy() {
     clearInterval(this.updateTimeout)
-    this.player.disconnect()
+    // this.player.disconnect()
   }
 }
 </script>
