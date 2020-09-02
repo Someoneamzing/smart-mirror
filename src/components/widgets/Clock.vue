@@ -116,7 +116,7 @@ export default {
       return this.displayType.startsWith('analog')
     },
     settingHours() {
-      return this.getDoubleDigit((this.is24Hour?this.hours:(this.hours > 12?this.hours - 12:this.hours)));
+      return this.getDoubleDigit((this.is24Hour?this.hours:(this.hours > 12?this.hours - 12:(this.hours == 0?12:this.hours))));
     },
     ...widgetSettings(Object.keys(widget.settings))
   },
