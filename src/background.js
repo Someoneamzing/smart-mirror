@@ -4,8 +4,10 @@ import { ipcMain, app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+import http from 'http'
 import socketio from 'socket.io'
-const io = socketio({serveClient: false})
+const server = http.createServer();
+const io = socketio(server, {serveClient: false})
 const alerts = [];
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
@@ -181,6 +183,6 @@ if (isDevelopment) {
   }
 }
 
-io.listen(process.env.VUE_APP_ALERT_WEBSERVER_PORT, ()=>{
+server.listen(process.env.VUE_APP_ALERT_WEBSERVER_PORT, ()=>{
   console.log("Alert server up on port " + process.env.VUE_APP_ALERT_WEBSERVER_PORT);
 })
