@@ -86,6 +86,7 @@ const SpotifyAPI = new (class Spotify {
   }
 
   refreshAfter(seconds) {
+    console.log(`Refreshing in ${seconds - 60} seconds.`);
     setTimeout(async ()=>{
       let body = new URLSearchParams();
       body.set('grant_type', 'refresh_token');
@@ -104,12 +105,13 @@ const SpotifyAPI = new (class Spotify {
       if (response.status === 200) {
         let {access_token, expires_in} = await response.json();
         priv.access_token = access_token;
+        console.log("refreshed");
         // this.setRefresh(refresh_token);
         this.refreshAfter(expires_in);
       } else {
         throw new Error("Error while refreshing access token. " + await response.text())
       }
-    }, seconds * 1000 - 10);
+    }, (seconds - 60) * 1000 );
   }
 
   async request(urlPath, params = {}) {
