@@ -140,8 +140,21 @@ app.on('activate', () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('widevine-ready',async () => {
-  console.log("Widevine ready... Launching");
+
+//Theb below has been disabled as Widevine does not support ARM arcitechtures.
+// app.on('widevine-ready',async () => {
+//   console.log("Widevine ready... Launching");
+//   if (isDevelopment && !process.env.IS_TEST) {
+//     // Install Vue Devtools
+//     try {
+//       await installExtension(VUEJS_DEVTOOLS)
+//     } catch (e) {
+//       console.error('Vue Devtools failed to install:', e.toString())
+//     }
+//   }
+//   createWindow()
+// })
+app.on('ready', async ()=>{
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
@@ -152,7 +165,6 @@ app.on('widevine-ready',async () => {
   }
   createWindow()
 })
-app.on('ready', ()=>console.log("App ready. Waiting for widevine..."))
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

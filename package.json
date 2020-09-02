@@ -48,7 +48,7 @@
     "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
     "css-loader": "^4.2.2",
-    "electron": "https://github.com/castlabs/electron-releases#v10.1.1-wvvmp",
+    "electron": "^10.1.1",
     "electron-devtools-installer": "^3.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
