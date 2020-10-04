@@ -87,7 +87,7 @@ export default {
       this.setInterval(()=>{
         this.today = new Date();
       }, 24 * 60 * 60 * 1000)
-    }, this.msToMidnight())
+    }, this.msToMidnight() + 1000)
     try {
       await GoogleCalendar.auth()
       this.authed = true;
