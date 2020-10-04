@@ -43,6 +43,7 @@ function createWindow() {
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
     },
+    kiosk: true,
     frame: false
   })
   authDialog = new BrowserWindow({
@@ -53,7 +54,6 @@ function createWindow() {
     },
     parent: win,
     modal: true,
-    kiosk: true,
     show: false
   })
   spotifyAuthDialog = new BrowserWindow({
