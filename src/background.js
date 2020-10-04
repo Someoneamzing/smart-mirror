@@ -53,6 +53,7 @@ function createWindow() {
     },
     parent: win,
     modal: true,
+    kiosk: true,
     show: false
   })
   spotifyAuthDialog = new BrowserWindow({
