@@ -181,8 +181,7 @@ export default {
     msToMidnight() {
       let now = new Date();
       let mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0)
-      // return mid.getTime() - now.getTime();
-      return this.startTime + 5000 - now.getTime();
+      return mid.getTime() - now.getTime();
     },
     getDateYYYYMMDD(date) {
       return `${date.getFullYear()}-${("" + (date.getMonth() + 1)).padStart('0',2)}-${("" + date.getDate()).padStart('0',2)}`
