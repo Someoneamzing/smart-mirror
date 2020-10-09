@@ -43,6 +43,7 @@ Vue.use(new (class {
     }
     Vue.prototype.$error = Vue.$error = (...args)=>{
       console.error(...args);
+      store.commit('error');
       ipcRenderer.send('alert', {
         type: 'error',
         message: args.map(arg=>{
@@ -99,3 +100,6 @@ new Vue({
   router,
   render: h => h(App)
 }).$mount('#app')
+
+process.on('uncaughtException', Vue.$error);
+process.on('unhandledPromiseRejection', Vue.$error);

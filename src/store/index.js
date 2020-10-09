@@ -32,8 +32,9 @@ function saveBuffered(data) {
 }
 
 export default new Vuex.Store({
-  state: () => ({}),
+  state: () => ({errors: 0}),
   mutations: {
+    error(state){state.errors += 1}
   },
   actions: {
   },

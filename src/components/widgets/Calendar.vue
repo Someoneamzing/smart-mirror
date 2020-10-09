@@ -79,12 +79,13 @@ export default {
     today: new Date(),
     dayTimeout: null,
     regularDay: false,
+    startTime: Date.now(),
   }},
   async created() {
     this.dayTimeout = setTimeout(()=>{
       this.today = new Date();
       this.regularDay = true;
-      this.setInterval(()=>{
+      setInterval(()=>{
         this.today = new Date();
       }, 24 * 60 * 60 * 1000)
     }, this.msToMidnight() + 1000)
@@ -180,7 +181,8 @@ export default {
     msToMidnight() {
       let now = new Date();
       let mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0)
-      return mid.getTime() - now.getTime();
+      // return mid.getTime() - now.getTime();
+      return this.startTime + 5000 - now.getTime();
     },
     getDateYYYYMMDD(date) {
       return `${date.getFullYear()}-${("" + (date.getMonth() + 1)).padStart('0',2)}-${("" + date.getDate()).padStart('0',2)}`

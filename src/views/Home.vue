@@ -3,6 +3,10 @@
     <div class="status-bar">
       <div class='status-group'><mwc-icon class="status-icon">{{wifiConnected?'wifi':'wifi_off'}}</mwc-icon></div>
       <div class='status-group'><span class='status-text'>{{(cpuTemp-(-1)==0 ?"--":cpuTemp) + " &deg;C"}}</span><mwc-icon class="status-icon">memory</mwc-icon></div>
+      <div class="status-group" v-if="$store.state.errors > 0">
+        <span class="status-text">{{$store.state.errors}}</span>
+        <mwc-icon class="status-icon">warning</mwc-icon>
+      </div>
     </div>
     <div class="control-bar">
       <div style="position: relative;">
