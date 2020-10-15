@@ -157,7 +157,7 @@ export default {
             }
           } else if ( today.getFullYear() === endDate.getFullYear() &&
                       today.getMonth() === endDate.getMonth() &&
-                      today.getDay() + 1 === endDate.getDay()) {
+                      today.getDate() + 1 === endDate.getDate()) {
             timeLeft = 'tomorrow'
           } else {
             timeLeft = 'on ' + endDate.toDateString();
@@ -173,7 +173,7 @@ export default {
         }
       } else if ( today.getFullYear() === date.getFullYear() &&
                   today.getMonth() === date.getMonth() &&
-                  today.getDay() + 1 === date.getDay()) {
+                  today.getDate() + 1 === date.getDate()) {
         return "Tomorrow"
       }
       return date.toDateString()
