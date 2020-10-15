@@ -57,18 +57,23 @@ export default {
       this.fetching = true;
       if (!state&&this.player) state = await this.player.getCurrentState();
       if (state == null) {
-        // console.log("API");
-        state = await SpotifyAPI.request('https://api.spotify.com/v1/me/player', {'additional_types': 'episode,track'})
-        // console.log(state);
-        const {progress_ms = -1, is_playing = false, item = null} = state;
-        this.duration = item?item.duration_ms:-1;
-        let diff = progress_ms-this.progress
-        this.smooth = diff < 2000 && diff > 0;
-        this.progress = progress_ms;
-        this.playing = is_playing;
-        this.current_track = item;
-        this.fetching = false;
-        return;
+        try {
+          // console.log("API");
+          state = await SpotifyAPI.request('https://api.spotify.com/v1/me/player', {'additional_types': 'episode,track'})
+          // console.log(state);
+          const {progress_ms = -1, is_playing = false, item = null} = state;
+          this.duration = item?item.duration_ms:-1;
+          let diff = progress_ms-this.progress
+          this.smooth = diff < 2000 && diff > 0;
+          this.progress = progress_ms;
+          this.playing = is_playing;
+          this.current_track = item;
+          this.fetching = false;
+          return;
+        } catch (e) {
+          this.$error(e.toString());
+        }
+
       }
       const {paused, position, track_window: {current_track}} = state;
       this.duration = current_track.duration_ms;
@@ -133,7 +138,7 @@ export default {
       //   }
       // })
       this.updateTimeout = setInterval(this.update.bind(this), 1000)
-    }).catch((err)=>console.error(err.stack))
+    }).catch((err)=>this.$error(err.toString()))
   },
   beforeDestroy() {
     clearInterval(this.updateTimeout)
@@ -143,6 +148,7 @@ export default {
 </script>
 
 <style lang="css" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
   .spotify {
     padding: 1rem;
     font-size: 10pt;

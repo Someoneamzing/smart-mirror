@@ -1,12 +1,12 @@
 import dotenv from 'dotenv'
 // import fs from 'fs'
-import '@/api/spotify-player'
+// import '@/api/spotify-player'
 // import { VM } from 'vm2'
 import path from 'path'
 import { ipcRenderer } from 'electron'
 import { v4 as uuid } from 'uuid'
 dotenv.config()
-let readyPromise;
+// let readyPromise;
 
 const priv = {
   accessToken: null,
@@ -52,8 +52,8 @@ const SpotifyAPI = new (class Spotify {
             body,
             headers: {
               "Accept": "application/json",
-              // "Content-Type": "application/x-www-form-urlencoded"
             },
+            credentials: 'omit',
           })
           if (response.status === 200) {
             let {access_token, expires_in, refresh_token} = await response.json();
@@ -61,7 +61,8 @@ const SpotifyAPI = new (class Spotify {
             this.setRefresh(refresh_token);
             this.refreshAfter(expires_in);
             this.authed = true;
-            readyPromise.then(()=>resolve())
+            resolve();
+            // readyPromise.then(()=>resolve())
             // this.loadSDK().then(()=>{
             // })
           } else {
@@ -98,8 +99,9 @@ const SpotifyAPI = new (class Spotify {
         method: "POST",
         headers: {
           "Accept": "application/json",
-          "Authorization": "Basic " + Buffer.from(`${priv.client_id}:${priv.client_secret}`).toString('base64')
+          "Authorization": "Basic " + Buffer.from(`${priv.client_id}:${priv.client_secret}`).toString('base64'),
         },
+        credentials: 'omit',
         body,
       })
       if (response.status === 200) {
@@ -123,7 +125,8 @@ const SpotifyAPI = new (class Spotify {
       // method: 'GET'
       headers: {
         'Authorization': `Bearer ${priv.access_token}`
-      }
+      },
+      credentials: 'omit'
     })
 
     if (!response.ok) throw new Error(`${response.status}: ${response.statusText};\n${await response.text()}`)
@@ -148,11 +151,11 @@ process.on('unhandledPromiseRejection', (err)=>{
   console.error(err.stack)
 })
 
-readyPromise = new Promise((resolve) => {
-  window.onSpotifyWebPlaybackSDKReady = ()=>{
-    SpotifyAPI.Player = window.Spotify.Player
-    resolve()
-  }
-});
+// readyPromise = new Promise((resolve) => {
+//   window.onSpotifyWebPlaybackSDKReady = ()=>{
+//     SpotifyAPI.Player = window.Spotify.Player
+//     resolve()
+//   }
+// });
 
 export default SpotifyAPI
